@@ -32,29 +32,11 @@ public:
     FLATTEN static async_once(Delete, const TCHAR* path) { return async_forward(_ff_call, f_unlink, path); }
     FLATTEN static async_once(Rename, const TCHAR* oldPath, const TCHAR* newPath) { return async_forward(_ff_call, f_rename, oldPath, newPath); }
 
-    FLATTEN async_once(Read, FileInfo& fi) { return async_forward(_ff_call, ReadImpl, (DIR*)this, (FILINFO*)&fi); }
-    FLATTEN async_once(FindFirst, FileInfo& fi, const TCHAR* path, const TCHAR* pattern) { return async_forward(_ff_call, FindFirstImpl, (DIR*)this, (FILINFO*&)fi, path, pattern); }
-    FLATTEN async_once(FindNext, FileInfo& fi) { return async_forward(_ff_call, FindNextImpl, (DIR*)this, (FILINFO*)&fi); }
+    FLATTEN async_once(Read, FileInfo& fi) { return async_forward(_ff_call, f_readdir, (DIR*)this, (FILINFO*)&fi); }
+    FLATTEN async_once(FindFirst, FileInfo& fi, const TCHAR* path, const TCHAR* pattern) { return async_forward(_ff_call, f_findfirst, (DIR*)this, (FILINFO*)&fi, path, pattern); }
+    FLATTEN async_once(FindNext, FileInfo& fi) { return async_forward(_ff_call, f_findnext, (DIR*)this, (FILINFO*)&fi); }
     FLATTEN async_once(Open, const TCHAR* path) { return async_forward(_ff_call, f_opendir, (DIR*)this, path); }
     FLATTEN async_once(Close, const TCHAR* path) { return async_forward(_ff_call, f_closedir, (DIR*)this); }
-
-    NO_INLINE static bool ReadImpl(DIR* dir, FILINFO* fi)
-    {
-        auto res = f_readdir(dir, fi);
-        return res == FR_OK && fi->fname[0];
-    }
-
-    NO_INLINE static bool FindFirstImpl(DIR* dir, FILINFO* fi, const TCHAR* path, const TCHAR* pattern)
-    {
-        auto res = f_findfirst(dir, fi, path, pattern);
-        return res == FR_OK && fi->fname[0];
-    }
-
-    NO_INLINE static bool FindNextImpl(DIR* dir, FILINFO* fi)
-    {
-        auto res = f_findnext(dir, fi);
-        return res == FR_OK && fi->fname[0];
-    }
 };
 
 }

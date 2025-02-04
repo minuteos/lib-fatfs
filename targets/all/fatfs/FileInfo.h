@@ -27,10 +27,13 @@ public:
     DWORD Time() const { return fdate << 16 | ftime; }
     fatfs::Attributes Attributes() const { return fatfs::Attributes(fattrib); }
 
+    bool IsValid() const { return fname[0]; }
     bool IsFile() const { return !(fattrib & AM_DIR); }
     bool IsDirectory() const { return fattrib & AM_DIR; }
     bool IsHidden() const { return fattrib & AM_HID; }
     bool IsSystem() const { return fattrib & AM_SYS; }
+
+    operator bool() const { return IsValid(); }
 
     const char* Name() const { return fname; }
 #if FF_USE_LFN

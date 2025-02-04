@@ -52,9 +52,9 @@ public:
     //! Tries to open a file with the specified mode
     FLATTEN async_once(Open, const TCHAR* path, Mode mode) { return async_forward(_ff_call, f_open, (FIL*)this, path, BYTE(mode)); }
     //! Reads data from a file
-    FLATTEN async_once(Read, Buffer buf, unsigned* pRead) { return async_forward(_ff_call, f_read, (FIL*)this, buf.Pointer(), buf.Length(), pRead); }
+    FLATTEN async_once(Read, Buffer buf, unsigned& pRead) { return async_forward(_ff_call, f_read, (FIL*)this, buf.Pointer(), buf.Length(), &pRead); }
     //! Writes data to a file
-    FLATTEN async_once(Write, Span buf, unsigned* pWritten) { return async_forward(_ff_call, f_write, (FIL*)this, buf.Pointer(), buf.Length(), pWritten); }
+    FLATTEN async_once(Write, Span buf, unsigned& pWritten) { return async_forward(_ff_call, f_write, (FIL*)this, buf.Pointer(), buf.Length(), &pWritten); }
     //! Moves the cursor to the specified position in a file
     FLATTEN async_once(Seek, FSIZE_t position) { return async_forward(_ff_call, f_lseek, (FIL*)this, position); }
     //! Truncates the file

@@ -22,8 +22,9 @@ struct DiskDriver
     using DSTATUS = fatfs::DSTATUS;
     using LBA_t = fatfs::LBA_t;
 
+    DSTATUS Status() const { return status; }
+
     virtual async(Init) = 0;
-    virtual DSTATUS Status() const = 0;
     virtual async(Read, void* buf, LBA_t sectorStart, size_t sectorCount) = 0;
     virtual async(Write, const void* buf, LBA_t sectorStart, size_t sectorCount) = 0;
     virtual async(IoCtl, uint8_t cmd, void* buff) = 0;
@@ -37,8 +38,12 @@ struct DiskDriver
         drivers[volume] = driver;
     }
 
+protected:
+    void Status(DSTATUS status) { this->status = status; }
+
 private:
     static DiskDriver* drivers[FF_VOLUMES];
+    DSTATUS status;
 };
 
 }
