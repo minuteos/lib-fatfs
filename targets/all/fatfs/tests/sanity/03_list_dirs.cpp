@@ -32,7 +32,7 @@ async_test
         auto res = await(f.d.Open, "");
         AssertEqual(res, FR_OK);
 
-        while (await(f.d.Read, f.fi))
+        while (!await(f.d.Read, f.fi) && f.fi)
         {
             DBGCL("DIR", "%s %X", f.fi.Name(), f.fi.Attributes());
             (f.fi.IsFile() ? f.fcount : f.dcount)++;
@@ -73,7 +73,7 @@ async_test
         auto res = await(f.d.Open, "many");
         AssertEqual(res, FR_OK);
 
-        while (await(f.d.Read, f.fi))
+        while (!await(f.d.Read, f.fi) && f.fi)
         {
             DBGCL("DIR", "%s %X", f.fi.Name(), f.fi.Attributes());
             (f.fi.IsFile() ? f.fcount : f.dcount)++;

@@ -31,7 +31,7 @@ async_test
     {
         auto res = await(f.f.Open, "many/test file 1.txt");
         AssertEqual(res, FR_OK);
-        res = await(f.f.Read, f.buffer, &f.read);
+        res = await(f.f.Read, f.buffer, f.read);
         AssertEqual(f.read, 100u);
         AssertEqual(res, FR_OK);
         AssertEqual(Span(f.buffer, 22), Span("CONTENT OF TEST FILE 1"));
@@ -63,7 +63,7 @@ async_test
             sprintf(f.buf, "many/%s", f.fi.Name());
             auto res = await(f.f.Open, f.buf);
             AssertEqual(res, FR_OK);
-            res = await(f.f.Read, f.buf, &f.read);
+            res = await(f.f.Read, f.buf, f.read);
             AssertEqual(res, FR_OK);
             AssertEqual(f.read, 100u);
             AssertEqual(Span(f.buf, 21), Span("CONTENT OF TEST FILE "));
@@ -91,7 +91,7 @@ async_def(
 
     for (;;)
     {
-        res = await(f.f.Read, Buffer(f.buf, blockSize), &f.read);
+        res = await(f.f.Read, Buffer(f.buf, blockSize), f.read);
         AssertEqual(res, FR_OK);
         if (f.read == 0)
         {

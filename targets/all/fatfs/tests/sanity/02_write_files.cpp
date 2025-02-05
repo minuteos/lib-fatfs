@@ -62,7 +62,7 @@ async_test
     {
         auto res = await(f.f.Open, "test1.txt");
         AssertEqual(res, FR_OK);
-        res = await(f.f.Write, "TEST DATA", &f.written);
+        res = await(f.f.Write, "TEST DATA", f.written);
         AssertEqual(f.written, 9u);
         AssertEqual(res, FR_OK);
         res = await(f.f.Sync);
@@ -122,7 +122,7 @@ async_test
             auto res = await(f.f.CreateOrTruncate, f.fname);
             AssertEqual(res, FR_OK);
             sprintf(f.fname, "CONTENT OF TEST FILE %d", f.i);
-            res = await(f.f.Write, Span(f.fname, sizeof(f.fname)), &f.written);
+            res = await(f.f.Write, Span(f.fname, sizeof(f.fname)), f.written);
             AssertEqual(res, FR_OK);
             AssertEqual(f.written, sizeof(f.fname));
             res = await(f.f.Sync);
@@ -148,7 +148,7 @@ async_def(
 
     for (f.i = 0; f.i < totalSize; f.i += blockSize)
     {
-        res = await(f.f.Write, Span((const char*)(intptr_t(&main) & ~0xFFFF), blockSize), &f.written);
+        res = await(f.f.Write, Span((const char*)(intptr_t(&main) & ~0xFFFF), blockSize), f.written);
         AssertEqual(res, FR_OK);
         AssertEqual(f.written, blockSize);
     }
