@@ -25,18 +25,14 @@ async_test
     async(Run)
     async_def(
         fatfs::File f;
-        unsigned read;
         uint8_t buffer[200];
     )
     {
-        auto res = await(f.f.Open, "many/test file 1.txt");
-        AssertEqual(res, FR_OK);
-        res = await(f.f.Read, f.buffer, f.read);
-        AssertEqual(f.read, 100u);
-        AssertEqual(res, FR_OK);
+        await(f.f.Open, "many/test file 1.txt");
+        auto res = await(f.f.Read, f.buffer);
+        AssertEqual(res, 100);
         AssertEqual(Span(f.buffer, 22), Span("CONTENT OF TEST FILE 1"));
-        res = await(f.f.Sync);
-        AssertEqual(res, FR_OK);
+        await(f.f.Close);
     }
     async_end
 }
@@ -52,20 +48,16 @@ async_test
         FileInfo fi;
         fatfs::File f;
         char buf[200];
-        unsigned read;
     )
     {
-        auto res = await(f.d.Open, "many");
-        AssertEqual(res, FR_OK);
+        await(f.d.Open, "many");
 
         while (await(f.d.Read, f.fi))
         {
             sprintf(f.buf, "many/%s", f.fi.Name());
-            auto res = await(f.f.Open, f.buf);
-            AssertEqual(res, FR_OK);
-            res = await(f.f.Read, f.buf, f.read);
-            AssertEqual(res, FR_OK);
-            AssertEqual(f.read, 100u);
+            await(f.f.Open, f.buf);
+            auto read = await(f.f.Read, f.buf);
+            AssertEqual(read, 100);
             AssertEqual(Span(f.buf, 21), Span("CONTENT OF TEST FILE "));
         }
     }
@@ -78,32 +70,22 @@ async_def(
     size_t i;
     fatfs::File f;
     FileInfo fi;
-    unsigned read;
     uint8_t* buf;
 )
 {
-    auto res = await(f.f.Open, "large/large.bin");
-    AssertEqual(res, FR_OK);
-    res = await(f.fi.Get, "large/large.bin");
-    AssertEqual(res, FR_OK);
+    await(f.f.Open, "large/large.bin");
+    await(f.fi.Get, "large/large.bin");
     AssertEqual(f.fi.Size(), 16u * 1024 * 1024);
     f.buf = new uint8_t[blockSize];
 
-    for (;;)
+    while (size_t read = await(f.f.Read, Buffer(f.buf, blockSize)))
     {
-        res = await(f.f.Read, Buffer(f.buf, blockSize), f.read);
-        AssertEqual(res, FR_OK);
-        if (f.read == 0)
-        {
-            break;
-        }
-        AssertEqual(f.read, blockSize);
+        AssertEqual(read, blockSize);
     }
 
     delete f.buf;
 
-    res = await(f.f.Close);
-    AssertEqual(res, FR_OK);
+    await(f.f.Close);
 }
 async_end
 

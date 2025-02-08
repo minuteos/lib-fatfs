@@ -23,8 +23,7 @@ async_test
     async(Run)
     async_def()
     {
-        auto res = await(Volume::Format, "", Volume::FormatFat);
-        AssertEqual(res, FR_OK);
+        await(Volume::Format, "", Volume::FormatFat);
     }
     async_end
 }
@@ -36,8 +35,7 @@ async_test
     async(Run)
     async_def()
     {
-        auto res = await(Volume::Format, "", Volume::FormatExFat);
-        AssertEqual(res, FR_OK);
+        await(Volume::Format, "", Volume::FormatExFat);
     }
     async_end
 }
@@ -49,8 +47,7 @@ async_test
     async(Run)
     async_def()
     {
-        auto res = await(Volume::Format, "", Volume::FormatFat32);
-        AssertEqual(res, FR_OK);
+        await(Volume::Format, "", Volume::FormatFat32);
     }
     async_end
 }

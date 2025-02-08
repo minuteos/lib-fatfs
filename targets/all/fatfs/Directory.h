@@ -28,15 +28,19 @@ namespace fatfs
 class Directory : private DIR
 {
 public:
-    FLATTEN static async_once(Create, const TCHAR* path) { return async_forward(_ff_call, f_mkdir, path); }
+    FLATTEN static async_once(Create, const TCHAR* path) { return async_forward(_ff_call_ar, NULL, MkdirImpl, path); }
     FLATTEN static async_once(Delete, const TCHAR* path) { return async_forward(_ff_call, f_unlink, path); }
     FLATTEN static async_once(Rename, const TCHAR* oldPath, const TCHAR* newPath) { return async_forward(_ff_call, f_rename, oldPath, newPath); }
 
-    FLATTEN async_once(Read, FileInfo& fi) { return async_forward(_ff_call, f_readdir, (DIR*)this, (FILINFO*)&fi); }
-    FLATTEN async_once(FindFirst, FileInfo& fi, const TCHAR* path, const TCHAR* pattern) { return async_forward(_ff_call, f_findfirst, (DIR*)this, (FILINFO*)&fi, path, pattern); }
-    FLATTEN async_once(FindNext, FileInfo& fi) { return async_forward(_ff_call, f_findnext, (DIR*)this, (FILINFO*)&fi); }
+    FLATTEN async_once(Read, FileInfo& fi) { return async_forward(_ff_call_ar, NULL, ReaddirImpl, (DIR*)this, (FILINFO*)&fi); }
+    FLATTEN async_once(FindNext, FileInfo& fi, const TCHAR* pattern) { pat = pattern; return async_forward(_ff_call_ar, NULL, FindNextImpl, (DIR*)this, (FILINFO*)&fi); }
     FLATTEN async_once(Open, const TCHAR* path) { return async_forward(_ff_call, f_opendir, (DIR*)this, path); }
     FLATTEN async_once(Close, const TCHAR* path) { return async_forward(_ff_call, f_closedir, (DIR*)this); }
+
+private:
+    static async_res_t MkdirImpl(const TCHAR* path);
+    static async_res_t ReaddirImpl(DIR* dir, FILINFO* fi);
+    static async_res_t FindNextImpl(DIR* dir, FILINFO* fi);
 };
 
 }

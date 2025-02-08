@@ -19,6 +19,9 @@
 #include "config.h"
 #include "DiskDriver.h"
 
+DEFINE_EXCEPTION(fatfs::Error);
+DEFINE_EXCEPTION(fatfs::DiskError);
+
 namespace fatfs
 {
 
@@ -35,7 +38,7 @@ static async_once(ff_AcquireMutex, int vol)
 int ff_mutex_create(int vol) { return true; }
 void ff_mutex_delete (int vol) { (void)vol; }
 
-int ff_mutex_take (int vol) { return kernel::Worker::Await(ff_AcquireMutex, vol); }
+int ff_mutex_take (int vol) { return kernel::Worker::Await(ff_AcquireMutex, vol).Value(); }
 void ff_mutex_give (int vol) { RESBIT(l_mutexes, vol); }
 
 #pragma endregion
@@ -46,7 +49,8 @@ DSTATUS disk_initialize(BYTE pdrv)
 {
     auto driver = DiskDriver::Get(pdrv);
     if (!driver) { return 0xFF; }
-    return kernel::Worker::Await(GetMethodDelegate(driver, Init));
+    auto res = kernel::Worker::Await(GetMethodDelegate(driver, Init));
+    return res.Success() || res.ExceptionType() == DiskError ? DRESULT(res.Value()) : RES_ERROR;
 }
 
 DSTATUS disk_status(BYTE pdrv)
@@ -64,7 +68,8 @@ DRESULT disk_read(BYTE pdrv, BYTE* buff, LBA_t sector, UINT count)
     // could be called without a worker, we need to fail in this case
     if (!kernel::Worker::CanAwait()) { return RES_NOTRDY; }
 #endif
-    return (DRESULT)kernel::Worker::Await(GetMethodDelegate(driver, Read), buff, sector, count);
+    auto res = kernel::Worker::Await(GetMethodDelegate(driver, Read), buff, sector, count);
+    return res.Success() || res.ExceptionType() == DiskError ? DRESULT(res.Value()) : RES_ERROR;
 }
 
 DRESULT disk_write(BYTE pdrv, const BYTE* buff, LBA_t sector, UINT count)
@@ -75,7 +80,8 @@ DRESULT disk_write(BYTE pdrv, const BYTE* buff, LBA_t sector, UINT count)
     // could be called without a worker, we need to fail in this case
     if (!kernel::Worker::CanAwait()) { return RES_NOTRDY; }
 #endif
-    return (DRESULT)kernel::Worker::Await(GetMethodDelegate(driver, Write), buff, sector, count);
+    auto res = kernel::Worker::Await(GetMethodDelegate(driver, Write), buff, sector, count);
+    return res.Success() || res.ExceptionType() == DiskError ? DRESULT(res.Value()) : RES_ERROR;
 }
 
 DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void* buff)
@@ -86,7 +92,8 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void* buff)
     // could be called without a worker, we need to fail in this case
     if (!kernel::Worker::CanAwait()) { return RES_NOTRDY; }
 #endif
-    return (DRESULT)kernel::Worker::Await(GetMethodDelegate(driver, IoCtl), cmd, buff);
+    auto res = kernel::Worker::Await(GetMethodDelegate(driver, IoCtl), cmd, buff);
+    return res.Success() || res.ExceptionType() == DiskError ? DRESULT(res.Value()) : RES_ERROR;
 }
 
 DWORD get_fattime()

@@ -27,8 +27,8 @@ async_test
         fatfs::File f;
     )
     {
-        auto res = await(f.f.Open, "test1.txt");
-        AssertEqual(res, FR_NO_FILE);
+        auto res = await_catch(f.f.Open, "test1.txt");
+        AssertException(res, fatfs::Error, FR_NO_FILE);
     }
     async_end
 }
@@ -42,10 +42,8 @@ async_test
         fatfs::File f;
     )
     {
-        auto res = await(f.f.Create, "test1.txt");
-        AssertEqual(res, FR_OK);
-        res = await(f.f.Sync);
-        AssertEqual(res, FR_OK);
+        await(f.f.Create, "test1.txt");
+        await(f.f.Close);
     }
     async_end
 }
@@ -57,16 +55,12 @@ async_test
     async(Run)
     async_def(
         fatfs::File f;
-        unsigned written;
     )
     {
-        auto res = await(f.f.Open, "test1.txt");
-        AssertEqual(res, FR_OK);
-        res = await(f.f.Write, "TEST DATA", f.written);
-        AssertEqual(f.written, 9u);
-        AssertEqual(res, FR_OK);
-        res = await(f.f.Sync);
-        AssertEqual(res, FR_OK);
+        await(f.f.Open, "test1.txt");
+        auto written = await(f.f.Write, "TEST DATA");
+        AssertEqual(written, 9);
+        await(f.f.Close);
     }
     async_end
 }
@@ -80,8 +74,8 @@ async_test
         fatfs::File f;
     )
     {
-        auto res = await(f.f.Create, "test1.txt");
-        AssertEqual(res, FR_EXIST);
+        auto res = await_catch(f.f.Create, "test1.txt");
+        AssertException(res, fatfs::Error, FR_EXIST);
     }
     async_end
 }
@@ -95,10 +89,8 @@ async_test
         fatfs::File f;
     )
     {
-        auto res = await(f.f.CreateOrTruncate, "test1.txt");
-        AssertEqual(res, FR_OK);
-        res = await(f.f.Sync);
-        AssertEqual(res, FR_OK);
+        await(f.f.CreateOrTruncate, "test1.txt");
+        await(f.f.Close);
     }
     async_end
 }
@@ -112,21 +104,17 @@ async_test
         int i;
         fatfs::File f;
         char fname[100];
-        unsigned written;
     )
     {
         await(Directory::Create, "many");
         for (f.i = 0; f.i < 100; f.i++)
         {
             sprintf(f.fname, "many/test file %d.txt", f.i);
-            auto res = await(f.f.CreateOrTruncate, f.fname);
-            AssertEqual(res, FR_OK);
+            await(f.f.CreateOrTruncate, f.fname);
             sprintf(f.fname, "CONTENT OF TEST FILE %d", f.i);
-            res = await(f.f.Write, Span(f.fname, sizeof(f.fname)), f.written);
-            AssertEqual(res, FR_OK);
-            AssertEqual(f.written, sizeof(f.fname));
-            res = await(f.f.Sync);
-            AssertEqual(res, FR_OK);
+            size_t written = await(f.f.Write, Span(f.fname, sizeof(f.fname)));
+            AssertEqual(written, sizeof(f.fname));
+            await(f.f.Close);
         }
     }
     async_end
@@ -143,18 +131,15 @@ async_def(
 )
 {
     await(Directory::Create, "large");
-    auto res = await(f.f.CreateOrTruncate, "large/large.bin");
-    AssertEqual(res, FR_OK);
+    await(f.f.CreateOrTruncate, "large/large.bin");
 
     for (f.i = 0; f.i < totalSize; f.i += blockSize)
     {
-        res = await(f.f.Write, Span((const char*)(intptr_t(&main) & ~0xFFFF), blockSize), f.written);
-        AssertEqual(res, FR_OK);
-        AssertEqual(f.written, blockSize);
+        size_t written = await(f.f.Write, Span((const char*)(intptr_t(&main) & ~0xFFFF), blockSize));
+        AssertEqual(written, blockSize);
     }
 
-    res = await(f.f.Close);
-    AssertEqual(res, FR_OK);
+    await(f.f.Close);
 }
 async_end
 

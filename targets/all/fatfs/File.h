@@ -52,9 +52,9 @@ public:
     //! Tries to open a file with the specified mode
     FLATTEN async_once(Open, const TCHAR* path, Mode mode) { return async_forward(_ff_call, f_open, (FIL*)this, path, BYTE(mode)); }
     //! Reads data from a file
-    FLATTEN async_once(Read, Buffer buf, unsigned& pRead) { return async_forward(_ff_call, f_read, (FIL*)this, buf.Pointer(), buf.Length(), &pRead); }
+    FLATTEN async_once(Read, Buffer buf) { return async_forward(_ff_call_ar, NULL, ReadImpl, (FIL*)this, buf.Pointer(), buf.Length()); }
     //! Writes data to a file
-    FLATTEN async_once(Write, Span buf, unsigned& pWritten) { return async_forward(_ff_call, f_write, (FIL*)this, buf.Pointer(), buf.Length(), &pWritten); }
+    FLATTEN async_once(Write, Span buf) { return async_forward(_ff_call_ar, NULL, WriteImpl, (FIL*)this, buf.Pointer(), buf.Length()); }
     //! Moves the cursor to the specified position in a file
     FLATTEN async_once(Seek, FSIZE_t position) { return async_forward(_ff_call, f_lseek, (FIL*)this, position); }
     //! Truncates the file
@@ -66,6 +66,10 @@ public:
     FLATTEN async_once(Close) { return async_forward(_ff_call, f_close, (FIL*)this); }
     //! Writes all remaining file data without closing the file
     FLATTEN async_once(Sync) { return async_forward(_ff_call, f_sync, (FIL*)this); }
+
+private:
+    static async_res_t ReadImpl(FIL* f, void* buf, UINT len);
+    static async_res_t WriteImpl(FIL* f, const void* buf, UINT len);
 };
 
 DEFINE_FLAG_ENUM(File::Mode);

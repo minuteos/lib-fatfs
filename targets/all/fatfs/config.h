@@ -13,6 +13,8 @@
 // resolve config using include path (ff.h uses relative include so it always finds its own version)
 #include <ffconf.h>
 
+#include <kernel/kernel.h>
+
 // the actual library lives in a namespace, so we need to include it inside it
 
 namespace fatfs
@@ -20,5 +22,8 @@ namespace fatfs
 
 #include "ff.h"
 #include "diskio.h"
+
+DECLARE_EXCEPTION(Error);
+DECLARE_EXCEPTION(DiskError);
 
 }

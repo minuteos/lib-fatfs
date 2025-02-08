@@ -29,10 +29,9 @@ async_test
         int dcount, fcount;
     )
     {
-        auto res = await(f.d.Open, "");
-        AssertEqual(res, FR_OK);
+        await(f.d.Open, "");
 
-        while (!await(f.d.Read, f.fi) && f.fi)
+        while (await(f.d.Read, f.fi))
         {
             DBGCL("DIR", "%s %X", f.fi.Name(), f.fi.Attributes());
             (f.fi.IsFile() ? f.fcount : f.dcount)++;
@@ -53,8 +52,8 @@ async_test
         Directory d;
     )
     {
-        auto res = await(f.d.Open, "nx");
-        AssertEqual(res, FR_NO_PATH);
+        auto res = await_catch(f.d.Open, "nx");
+        AssertException(res, Error, FR_NO_PATH);
     }
     async_end
 }
@@ -70,10 +69,9 @@ async_test
         int dcount, fcount;
     )
     {
-        auto res = await(f.d.Open, "many");
-        AssertEqual(res, FR_OK);
+        await(f.d.Open, "many");
 
-        while (!await(f.d.Read, f.fi) && f.fi)
+        while (await(f.d.Read, f.fi))
         {
             DBGCL("DIR", "%s %X", f.fi.Name(), f.fi.Attributes());
             (f.fi.IsFile() ? f.fcount : f.dcount)++;
@@ -81,6 +79,32 @@ async_test
 
         AssertEqual(f.fcount, 100);
         AssertEqual(f.dcount, 0);
+    }
+    async_end
+}
+async_test_end
+
+TEST_CASE("04 Pattern Match")
+async_test
+{
+    async(Run)
+    async_def(
+        Directory d;
+        FileInfo fi;
+        int fcount, dcount;
+    )
+    {
+        await(f.d.Open, "many");
+
+        while (await(f.d.FindNext, f.fi, "*5.*"))
+        {
+            DBGCL("DIR", "%s %X", f.fi.Name(), f.fi.Attributes());
+            Assert(f.fi.IsFile());
+            f.fcount++;
+
+        }
+
+        AssertEqual(f.fcount, 10);
     }
     async_end
 }
