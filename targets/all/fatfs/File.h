@@ -67,6 +67,11 @@ public:
     //! Writes all remaining file data without closing the file
     FLATTEN async_once(Sync) { return async_forward(_ff_call, f_sync, (FIL*)this); }
 
+    //! Gets the current position in the file
+    FLATTEN size_t Position() { return f_tell(this); }
+    //! Gets the current file size
+    FLATTEN size_t Size() { return f_size(this); }
+
 private:
     static async_res_t ReadImpl(FIL* f, void* buf, UINT len);
     static async_res_t WriteImpl(FIL* f, const void* buf, UINT len);
