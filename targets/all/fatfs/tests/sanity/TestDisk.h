@@ -21,7 +21,6 @@ public:
     }
 
     virtual async(Init);
-    virtual DSTATUS Status() const { return status; };
     virtual async(Read, void* buf, LBA_t sectorStart, size_t sectorCount);
     virtual async(Write, const void* buf, LBA_t sectorStart, size_t sectorCount);
     virtual async(IoCtl, uint8_t cmd, void* buff);
@@ -37,6 +36,5 @@ private:
 
     static TestDisk s_instance;
     int fd;
-    DSTATUS status = STA_NOINIT;
     static TestDisk drv;
 };

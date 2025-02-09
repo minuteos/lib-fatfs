@@ -18,7 +18,7 @@ TestDisk TestDisk::s_instance;
 async(TestDisk::Init)
 async_def_sync()
 {
-    if (status & STA_NOINIT)
+    if (Status() & STA_NOINIT)
     {
         const char* filename = "/tmp/testdisk.img";
         fd = open(filename, O_CREAT | O_RDWR, 0600);
@@ -31,7 +31,7 @@ async_def_sync()
         }
         delete[] zero;
         MYDBG("Initialized disk with %d %d-byte sectors (%d %d-byte blocks)", SectorCount, SectorSize, BlockCount, BlockSize);
-        status &= ~STA_NOINIT;
+        Status(Status() & ~STA_NOINIT);
     }
 
     async_return(fatfs::RES_OK);

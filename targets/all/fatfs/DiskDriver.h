@@ -24,6 +24,8 @@ struct DiskDriver
 
     DSTATUS Status() const { return status; }
 
+    bool NoDisk() const { return status & STA_NODISK; }
+
     virtual async(Init) = 0;
     virtual async(Read, void* buf, LBA_t sectorStart, size_t sectorCount) = 0;
     virtual async(Write, const void* buf, LBA_t sectorStart, size_t sectorCount) = 0;
@@ -38,12 +40,14 @@ struct DiskDriver
         drivers[volume] = driver;
     }
 
+    async_once(StatusChange, OPT_TIMEOUT_ARG) { return async_forward(WaitMaskNot, status, 0xFF, status, timeout); }
+
 protected:
     void Status(DSTATUS status) { this->status = status; }
 
 private:
     static DiskDriver* drivers[FF_VOLUMES];
-    DSTATUS status;
+    DSTATUS status = STA_NOINIT | STA_NODISK;
 };
 
 }
