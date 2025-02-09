@@ -31,16 +31,14 @@ public:
         { return async_forward(_ff_call, f_unlink, path); }
     FLATTEN static async_once(Rename, const TCHAR* oldPath, const TCHAR* newPath)
         { return async_forward(_ff_call, f_rename, oldPath, newPath); }
+    FLATTEN static async_once(Mount, FATFS* fs, const TCHAR* path, bool immediate = false)
+        { return async_forward(_ff_call, f_mount, fs, path, immediate); }
+    FLATTEN static async_once(GetFree, const TCHAR* path)
+        { return async_forward(_ff_call_ar, {}, GetFreeImpl, path); }
 
 private:
-    static NO_INLINE FRESULT FormatImpl(const TCHAR* path, VolumeFormat format, int bufferSectors)
-    {
-        auto buf = new char[FF_MAX_SS * bufferSectors];
-        MKFS_PARM parm = { .fmt = format };
-        auto res = f_mkfs(path, &parm, buf, FF_MAX_SS * bufferSectors);
-        delete[] buf;
-        return res;
-    }
+    static intptr_t FormatImpl(const TCHAR* path, VolumeFormat format, int bufferSectors);
+    static async_res_t GetFreeImpl(const TCHAR* path);
 };
 
 }
