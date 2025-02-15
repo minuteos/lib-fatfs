@@ -35,7 +35,7 @@ public:
     FLATTEN async_once(Read, FileInfo& fi) { return async_forward(_ff_call_ar, NULL, ReaddirImpl, (DIR*)this, (FILINFO*)&fi); }
     FLATTEN async_once(FindNext, FileInfo& fi, const TCHAR* pattern) { pat = pattern; return async_forward(_ff_call_ar, NULL, FindNextImpl, (DIR*)this, (FILINFO*)&fi); }
     FLATTEN async_once(Open, const TCHAR* path) { return async_forward(_ff_call, f_opendir, (DIR*)this, path); }
-    FLATTEN async_once(Close, const TCHAR* path) { return async_forward(_ff_call, f_closedir, (DIR*)this); }
+    FLATTEN async_once(Close) { return async_forward(_ff_call, f_closedir, (DIR*)this); }
 
 private:
     static async_res_t MkdirImpl(const TCHAR* path);
