@@ -96,7 +96,7 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void* buff)
     return res.Success() || res.ExceptionType() == DiskError ? DRESULT(res.Value()) : RES_ERROR;
 }
 
-DWORD get_fattime()
+[[gnu::weak]] DWORD get_fattime()
 {
     // TODO
     return 0;
