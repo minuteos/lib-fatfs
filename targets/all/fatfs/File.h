@@ -66,6 +66,8 @@ public:
     FLATTEN async_once(Close) { return async_forward(_ff_call, f_close, (FIL*)this); }
     //! Writes all remaining file data without closing the file
     FLATTEN async_once(Sync) { return async_forward(_ff_call, f_sync, (FIL*)this); }
+    //! Updates FAT directory entry for already written (i.e. block-aligned) data
+    FLATTEN async_once(SoftSync) { return async_forward(_ff_call, SoftSyncImpl, (FIL*)this); }
 
     //! Gets the current position in the file
     FLATTEN size_t Position() { return f_tell(this); }
@@ -75,6 +77,7 @@ public:
 private:
     static async_res_t ReadImpl(FIL* f, void* buf, UINT len);
     static async_res_t WriteImpl(FIL* f, const void* buf, UINT len);
+    static FRESULT SoftSyncImpl(FIL* f);
 };
 
 DEFINE_FLAG_ENUM(File::Mode);
