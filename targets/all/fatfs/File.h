@@ -78,6 +78,9 @@ private:
     static async_res_t ReadImpl(FIL* f, void* buf, UINT len);
     static async_res_t WriteImpl(FIL* f, const void* buf, UINT len);
     static FRESULT SoftSyncImpl(FIL* f);
+
+    friend class RapidJsonInputStream;
+    friend class RapidJsonOutputStream;
 };
 
 DEFINE_FLAG_ENUM(File::Mode);

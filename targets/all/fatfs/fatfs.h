@@ -16,3 +16,5 @@
 #include "Directory.h"
 #include "File.h"
 #include "DiskDriver.h"
+
+#include "RapidJson.h"
