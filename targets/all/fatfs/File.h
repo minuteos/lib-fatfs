@@ -38,6 +38,9 @@ public:
     DECLARE_FLAG_ENUM(Mode);
 
     //! Tries to opens an existing file
+    FLATTEN static async_once(Stat, const TCHAR* path, FILINFO* info) { return async_forward(_ff_call_ar, NULL, StatImpl, path, info); }
+
+    //! Tries to opens an existing file
     ALWAYS_INLINE async_once(Open, const TCHAR* path, bool write = true)
         { return async_forward(Open, path, Mode::Open | Mode::Read | Mode::Write * write); }
     //! Opens an existing file or creates a new one
@@ -78,6 +81,7 @@ private:
     static async_res_t ReadImpl(FIL* f, void* buf, UINT len);
     static async_res_t WriteImpl(FIL* f, const void* buf, UINT len);
     static FRESULT SoftSyncImpl(FIL* f);
+    static async_res_t StatImpl(const TCHAR* path, FILINFO* info);
 
     friend class RapidJsonInputStream;
     friend class RapidJsonOutputStream;

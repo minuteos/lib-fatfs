@@ -65,4 +65,17 @@ FRESULT File::SoftSyncImpl(FIL* f)
     return res;
 }
 
+async_res_t File::StatImpl(const TCHAR* path, FILINFO* info)
+{
+    if (auto err = f_stat(path, info))
+    {
+        if (err == FR_NO_FILE)
+        {
+            async_once_return(false);
+        }
+        async_once_throw(Error, err);
+    }
+    async_once_return(true);
+}
+
 }
