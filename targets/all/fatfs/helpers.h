@@ -13,6 +13,34 @@
 namespace fatfs
 {
 
+class _StackAlloc : kernel::WorkerStackAllocator
+{
+public:
+    static kernel::WorkerStackAllocator* Instance() { return &s_instance; }
+
+    void* Allocate(size_t& size) override
+    {
+        size = FF_STACK_SIZE;
+        if (used)
+        {
+            return nullptr;
+        }
+        used = true;
+        return stack;
+    }
+
+    void Free(void* ptr) override
+    {
+        ASSERT(used);
+        used = false;
+    }
+
+private:
+    static _StackAlloc s_instance;
+    uint8_t stack[FF_STACK_SIZE];
+    bool used = false;
+};
+
 template<typename Fn, typename Arg0, typename... Args> ALWAYS_INLINE async_once(_ff_call, Fn fn, Arg0 arg0, Args... args)
 {
     return async_forward(_ff_call_ar, [](auto res) { return _ASYNC_RES_VALUE(res) ? _ASYNC_RES(_ASYNC_RES_VALUE(res), Error) : res; }, fn, arg0, args...);
@@ -34,6 +62,7 @@ template<typename Fn, typename Arg0, typename... Args> ALWAYS_INLINE async_once(
     }
 #endif
     return async_forward(kernel::Worker::RunWithOptions, {
+        .stackAlloc = _StackAlloc::Instance(),
         .adjustResult = adjustResult,
         .noPreempt = true, .trySync = true
     }, fn, arg0, args...);

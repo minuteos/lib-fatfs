@@ -176,3 +176,7 @@
 #ifndef FF_FS_REENTRANT
 #define FF_FS_REENTRANT	1
 #endif
+
+#ifndef FF_STACK_SIZE
+#define FF_STACK_SIZE   1024
+#endif
