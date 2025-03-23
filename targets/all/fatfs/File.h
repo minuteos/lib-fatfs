@@ -77,6 +77,9 @@ public:
     //! Gets the current file size
     FLATTEN size_t Size() { return f_size(this); }
 
+    //! Raw access to the current sector buffer - use with caution
+    FLATTEN Buffer SectorBuffer() { return Buffer(buf); }
+
 private:
     static async_res_t ReadImpl(FIL* f, void* buf, UINT len);
     static async_res_t WriteImpl(FIL* f, const void* buf, UINT len);
