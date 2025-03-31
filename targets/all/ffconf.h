@@ -178,5 +178,5 @@
 #endif
 
 #ifndef FF_STACK_SIZE
-#define FF_STACK_SIZE   1024
+#define FF_STACK_SIZE   1536
 #endif
