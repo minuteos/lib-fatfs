@@ -24,6 +24,13 @@ public:
         Fill(0);
     }
 
+    RapidJsonInputStream(fatfs::File& f, const char* path)
+        : f(&f), buf(f.buf), i(0)
+    {
+        f.err = f_open(&f, path, FA_OPEN_EXISTING | FA_READ);    // f_open doesn't set f.err
+        Fill(0);
+    }
+
     typedef char Ch;
 
     //! Gets the upcoming input character
