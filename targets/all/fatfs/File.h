@@ -80,6 +80,9 @@ public:
     //! Raw access to the current sector buffer - use with caution
     FLATTEN Buffer SectorBuffer() { return Buffer(buf); }
 
+    //! Access to the file error status
+    FRESULT GetError() { return (FRESULT)f_error(this); }
+
 private:
     static async_res_t ReadImpl(FIL* f, void* buf, UINT len);
     static async_res_t WriteImpl(FIL* f, const void* buf, UINT len);
