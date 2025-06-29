@@ -22,6 +22,10 @@
 DEFINE_EXCEPTION(fatfs::Error);
 DEFINE_EXCEPTION(fatfs::DiskError);
 
+#ifndef FATFS_MUTEX_TIMEOUT
+#define FATFS_MUTEX_TIMEOUT Timeout::Seconds(5)
+#endif
+
 namespace fatfs
 {
 
@@ -31,7 +35,7 @@ static uint32_t l_mutexes = 0;
 
 static async_once(ff_AcquireMutex, int vol)
 {
-    return async_forward(AcquireMask, l_mutexes, BIT(vol), Timeout::Seconds(1));
+    return async_forward(AcquireMask, l_mutexes, BIT(vol), FATFS_MUTEX_TIMEOUT);
 }
 
 // Mutex functions so they can be inlined
