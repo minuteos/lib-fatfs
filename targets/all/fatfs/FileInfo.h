@@ -36,6 +36,8 @@ public:
     operator bool() const { return IsValid(); }
 
     const char* Name() const { return fname; }
+    Span NameSpan() const { return Span(fname).Split(0); }
+
 #if FF_USE_LFN
     const char* ShortName() const { return altname; }
 #else
