@@ -33,9 +33,14 @@ namespace fatfs
 
 static uint32_t l_mutexes = 0;
 
-static async_once(ff_AcquireMutex, int vol)
+async_once(ff_AcquireMutex, int vol)
 {
     return async_forward(AcquireMask, l_mutexes, BIT(vol), FATFS_MUTEX_TIMEOUT);
+}
+
+void ff_ReleaseMutex(int vol)
+{
+    RESBIT(l_mutexes, vol);
 }
 
 // Mutex functions so they can be inlined
